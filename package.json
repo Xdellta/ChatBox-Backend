@@ -1,0 +1,29 @@
+{
+  "dependencies": {
+    "axios": "^1.8.1",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "nodemon": "^3.1.9",
+    "pg": "^8.13.3",
+    "ws": "^8.18.1"
+  },
+  "name": "chatbox-backend",
+  "version": "1.0.0",
+  "description": "ChatBox is a web-based social media chat app built with Vue.js and Express.js, featuring real-time communication via WebSocket and a futuristic UI/UX.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "NODE_ENV=development nodemon index.js",
+    "start": "NODE_ENV=production node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Xdellta/ChatBox-Backend.git"
+  },
+  "author": "Patryk Piotrowski",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Xdellta/ChatBox-Backend/issues"
+  },
+  "homepage": "https://github.com/Xdellta/ChatBox-Backend#readme"
+}

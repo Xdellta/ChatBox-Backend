@@ -1,0 +1,33 @@
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Node modules
+node_modules/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Build directories
+dist/
+dist-ssr/
+coverage/
+
+# Environment files
+*.local
+
+# Cypress test directories
+/cypress/videos/
+/cypress/screenshots/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# TypeScript build info
+*.tsbuildinfo
