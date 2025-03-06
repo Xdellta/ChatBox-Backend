@@ -11,5 +11,5 @@ app.get('/', (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Server is running at ${protocol}://${host}:${port}`);
+    console.log(`Server is running at ${protocol}://${host}:${port} in ${process.env.NODE_ENV || development} mode`);
 });
