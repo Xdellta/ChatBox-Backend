@@ -12,9 +12,7 @@
   "description": "ChatBox is a web-based social media chat app built with Vue.js and Express.js, featuring real-time communication via WebSocket and a futuristic UI/UX.",
   "main": "index.js",
   "scripts": {
-    "dev": "NODE_ENV=development nodemon index.js",
-    "start": "NODE_ENV=production node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "NODE_ENV=development nodemon index.js"
   },
   "repository": {
     "type": "git",

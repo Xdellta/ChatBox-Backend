@@ -36,18 +36,21 @@ cd ChatBox-Backend
 
 <br>
 
-**2.** Install dependencies:
+**2.** Copy the `.env.example` file to `.env`, and then configure the contents:
+```sh
+cp .env.example .env
+```
+
+<br>
+
+**3.** Install dependencies:
 ```sh
 npm install
 ```
 
 <br>
 
-**3.** Run the application:
+**4.** Run the application:
 ```sh
 npm run dev
-```
-or
-```sh
-npm run start
 ```
