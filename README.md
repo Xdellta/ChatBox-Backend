@@ -60,7 +60,14 @@ npx prisma migrate dev --name init
 
 <br>
 
-**5.** Run the application:
+**5.** (Optional) Seed the database with initial data:
+```sh
+npm run seed
+```
+
+<br>
+
+**6.** Run the application:
 ```sh
 npm run dev
 ```
