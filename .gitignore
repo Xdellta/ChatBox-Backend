@@ -14,15 +14,16 @@ Thumbs.db
 
 # Build directories
 dist/
-dist-ssr/
 coverage/
 
-# Environment files
-*.local
+# Prisma
+prisma/migrations/
+prisma/generated/
+prisma/dev.db
 
-# Cypress test directories
-/cypress/videos/
-/cypress/screenshots/
+# Environment files
+.env
+*.local
 
 # Editor directories and files
 .vscode/*
