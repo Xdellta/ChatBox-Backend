@@ -50,7 +50,17 @@ npm install
 
 <br>
 
-**4.** Run the application:
+**4.** Initialize Prisma and apply migrations:
+```sh
+npx prisma init
+```
+```sh
+npx prisma migrate dev --name init
+```
+
+<br>
+
+**5.** Run the application:
 ```sh
 npm run dev
 ```
