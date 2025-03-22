@@ -2,6 +2,7 @@
   "dependencies": {
     "@prisma/client": "^6.5.0",
     "axios": "^1.8.1",
+    "bcrypt": "^5.1.1",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "nodemon": "^3.1.9",
@@ -14,7 +15,8 @@
   "description": "ChatBox is a web-based social media chat app built with Vue.js and Express.js, featuring real-time communication via WebSocket and a futuristic UI/UX.",
   "main": "index.js",
   "scripts": {
-    "dev": "NODE_ENV=development nodemon index.js"
+    "dev": "NODE_ENV=development nodemon index.js",
+    "seed": "node prisma/seed.js"
   },
   "repository": {
     "type": "git",
