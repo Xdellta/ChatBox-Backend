@@ -1,8 +1,8 @@
+const { generateAccessToken, generateRefreshToken } = require('../services/jwtService');
 const HttpError = require('../utils/HttpError');
 const patterns = require('../utils/patterns');
 const prisma = require('../../prisma/prismaClient');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 
 // Login
 async function login(req, res, next) {
@@ -10,15 +10,15 @@ async function login(req, res, next) {
 
   // Validate inputs
   if (!email || !password) {
-    return next(new HttpError(400, 'Email and password are required.', req));
+    return next(new HttpError(400, 'Email and password are required.', null, req));
   }
 
   if (!patterns.email.test(email)) {
-    return next(new HttpError(400, 'Invalid email format.', req));
+    return next(new HttpError(400, 'Invalid email format.', null, req));
   }
 
   if (!patterns.password.test(password)) {
-    return next(new HttpError(400, 'Invalid password format.', req));
+    return next(new HttpError(400, 'Invalid password format.', null, req));
   }
 
   try {
@@ -26,23 +26,27 @@ async function login(req, res, next) {
     const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user || !(await bcrypt.compare(password, user.hashed_password))) {
-      return next(new HttpError(400, 'Invalid email or password.', req));
+      return next(new HttpError(400, 'Invalid email or password.', null, req));
     }
 
     // Generate JWT token
-    if (!process.env.JWT_SECRET) {
-      return next(new HttpError(500, 'Server configuration error. Please contact support.', req));
-    }    
+    const accessToken = generateAccessToken(user.user_id);
+    const refreshToken = generateRefreshToken(user.user_id);
 
-    const accessToken = jwt.sign({ userId: user.user_id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    const refreshToken = jwt.sign({ userId: user.user_id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+    if (accessToken.error) {
+      return next(new HttpError(500, 'Error while generating access token.', accessToken.error, req));
+    }
+    
+    if (refreshToken.error) {
+      return next(new HttpError(500, 'Error while generating refresh token.', refreshToken.error, req));
+    }
 
     // Successful login
     res.setHeader('Authorization', `Bearer ${accessToken}`);
     res.setHeader('X-Refresh-Token', refreshToken);
     res.status(200).json({ message: 'Login successful.' });
   } catch (error) {
-    return next(new HttpError(500, 'An error occurred while processing the login request.', req));
+    return next(new HttpError(500, 'An error occurred while processing the login request.', error.message, req));
   }
 }
 
@@ -53,25 +57,25 @@ async function register(req, res, next) {
 
   // Validate inputs
   if (!username || !email || !password) {
-    return next(new HttpError(400, 'Username, email and password are required.', req));
+    return next(new HttpError(400, 'Username, email and password are required.', null, req));
   }
 
   if (!patterns.username.test(username)) {
-    return next(new HttpError(400, 'Invalid username format.', req));
+    return next(new HttpError(400, 'Invalid username format.', null, req));
   }
 
   if (!patterns.email.test(email)) {
-    return next(new HttpError(400, 'Invalid email format.', req));
+    return next(new HttpError(400, 'Invalid email format.', null, req));
   }
 
   if (!patterns.password.test(password)) {
-    return next(new HttpError(400, 'Invalid password format.', req));
+    return next(new HttpError(400, 'Invalid password format.', null, req));
   }
 
   try {
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
-      return next(new HttpError(400, 'A user with this email already exists.', req));
+      return next(new HttpError(400, 'A user with this email already exists.', null, req));
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -85,20 +89,24 @@ async function register(req, res, next) {
     });
 
     // Generate JWT token
-    if (!process.env.JWT_SECRET) {
-      return next(new HttpError(500, 'Server configuration error. Please contact support.', req));
-    }    
+    const accessToken = generateAccessToken(newUser.user_id);
+    const refreshToken = generateRefreshToken(newUser.user_id);
 
-    const accessToken = jwt.sign({ userId: newUser.user_id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    const refreshToken = jwt.sign({ userId: newUser.user_id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+    if (accessToken.error) {
+      return next(new HttpError(500, 'Error while generating access token.', accessToken.error, req));
+    }
 
+    if (refreshToken.error) {
+      return next(new HttpError(500, 'Error while generating refresh token.', refreshToken.error, req));
+    }
+
+    // Successful register
     res.setHeader('Authorization', `Bearer ${accessToken}`);
     res.setHeader('X-Refresh-Token', refreshToken);
     res.status(200).json({ message: 'Register successful.' });
   } catch (error) {
-    return next(new HttpError(500, 'An error occurred while processing the register request.', req));
+    return next(new HttpError(500, 'An error occurred while processing the register request.', error.message, req));
   }
 }
-
 
 module.exports = { login, register };

@@ -1,7 +1,8 @@
 class HttpError extends Error {
-  constructor(status, message, req = null) {
+  constructor(status, message, devMessage, req = null) {
     super(message);
     this.status = status;
+    this.devMessage = devMessage;
 
     if (req) {
       this.method = req.method;

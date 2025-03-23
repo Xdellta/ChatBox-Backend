@@ -1,9 +1,9 @@
-const { json } = require('express');
 const statuses = require('statuses');
 
 module.exports = function errorHandler(err, req, res, next) {
   const mode = process.env.NODE_ENV || 'development';
   const status = err.status || 500;
+  const devMessage = err.devMessage;
 
   const response = {
     message: err.message || statuses.message[status],
@@ -11,6 +11,7 @@ module.exports = function errorHandler(err, req, res, next) {
 
   if (mode === 'development') {
     response.details = {
+      error: devMessage,
       status,
       method: err.method,
       url: err.url,
