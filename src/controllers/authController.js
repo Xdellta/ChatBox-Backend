@@ -29,8 +29,8 @@ async function login(req, res, next) {
     }
 
     // Generate JWT token
-    const accessToken = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    const refreshToken = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+    const accessToken = jwt.sign({ userId: user.user_id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const refreshToken = jwt.sign({ userId: user.user_id }, process.env.JWT_SECRET, { expiresIn: '30d' });
 
     // Successful login
     res.setHeader('Authorization', `Bearer ${accessToken}`);
