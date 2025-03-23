@@ -5,9 +5,11 @@
     "bcrypt": "^5.1.1",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
     "nodemon": "^3.1.9",
     "pg": "^8.13.3",
     "prisma": "^6.5.0",
+    "statuses": "^2.0.1",
     "ws": "^8.18.1"
   },
   "name": "chatbox-backend",
@@ -16,6 +18,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "NODE_ENV=development nodemon index.js",
+    "start": "NODE_ENV=production node index.js",
     "seed": "node prisma/seed.js"
   },
   "repository": {
