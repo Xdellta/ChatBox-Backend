@@ -46,6 +46,30 @@ For proper operation, you must also download: **[ChatBox FRONTEND](https://githu
 
 <br>
 
+### 2. Register
+- **URL:** `/api/auth/register`
+- **Method:** `POST`
+- **Description:** Registers a new user and returns access and refresh tokens.
+- **Request:**
+```sh
+{
+  "username": "user123",
+  "email": "user@example.com",
+  "password": "Password!123"
+}
+```
+- **Response:**
+  - **200:** Success message with tokens in headers.
+  - **400:** Invalid input (`username`, `email`, `password`) or user already exists.
+  - **500:** Server error.
+
+<br>
+
+## 🚀 Getting Started
+For proper operation, you must also download: **[ChatBox FRONTEND](https://github.com/Xdellta/ChatBox-Frontend.git)**
+
+<br>
+
 **1.** Clone the repository:
 ```sh
 git clone https://github.com/Xdellta/ChatBox-Backend.git
