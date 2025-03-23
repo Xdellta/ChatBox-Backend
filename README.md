@@ -23,7 +23,7 @@ ChatBox is a web-based social media chat application built with Vue.js (**[front
 
 ## 🔌 Endpoint Specification
 
-### Login
+### 1. Login
 **URL:** `/api/auth/login`
 **Method:** `POST`
 **Description:** Logs in a user and returns access and refresh tokens.
