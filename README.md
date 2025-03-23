@@ -31,7 +31,7 @@ ChatBox is a web-based social media chat application built with Vue.js (**[front
 ```ch
 {
   "email": "user@example.com",
-  "password": "password123"
+  "password": "Password!123"
 }
 ```
 - **Response:**
