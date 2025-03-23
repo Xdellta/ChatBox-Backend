@@ -17,6 +17,7 @@ module.exports = function errorHandler(err, req, res, next) {
       body: err.body,
       headers: err.headers,
       timestamp: err.timestamp,
+      stack: err.stack,
     }
   }
 
