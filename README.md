@@ -24,20 +24,20 @@ ChatBox is a web-based social media chat application built with Vue.js (**[front
 ## 🔌 Endpoint Specification
 
 ### 1. Login
-**URL:** `/api/auth/login`
-**Method:** `POST`
-**Description:** Logs in a user and returns access and refresh tokens.
-**Request:**
+- **URL:** `/api/auth/login`
+- **Method:** `POST`
+- **Description:** Logs in a user and returns access and refresh tokens.
+- **Request:**
 ```ch
 {
   "email": "user@example.com",
   "password": "password123"
 }
 ```
-**Response:**
-- **200:** Success message with tokens in headers.
-- **400:** Invalid email/password.
-- **500:** Server error.
+- **Response:**
+  - **200:** Success message with tokens in headers.
+  - **400:** Invalid email/password.
+  - **500:** Server error.
 
 <br>
 
