@@ -1,30 +1,42 @@
 const jwt = require('jsonwebtoken');
 
-function generateAccessToken(userId) {
+function generateToken(userId, secret, expiresIn) {
   if (!userId) {
-    throw new Error('User ID is required to generate the access token.');
+    throw new Error('User ID is required to generate JWT.');
   }
 
-  if (!process.env.JWT_ACCESS_SECRET) {
-    throw new Error('JWT access secret is missing in environment variables.');
+  if (!secret) {
+    throw new Error('Secret key is required to generate JWT.');
   }
 
-  const accessToken = jwt.sign({ userId }, process.env.JWT_ACCESS_SECRET, { expiresIn: '1h' });
-  return accessToken;
+  if (!expiresIn) {
+    throw new Error('Expiration time is required to generate JWT.');
+  }
+
+  try {
+    const token = jwt.sign({ userId }, secret, { expiresIn });
+    return token;
+  } catch (error) {
+    throw new Error(`Error generating token: ${error.message}`);
+  }
 }
 
 
-function generateRefreshToken(userId) {
-  if (!userId) {
-    throw new Error('User ID is required to generate the access token.');
+function decodedToken(secret, token) {
+  if (!secret) {
+    throw new Error('Secret key is required to decode JWT.');
   }
 
-  if (!process.env.JWT_REFRESH_SECRET) {
-    throw new Error('JWT refresh secret is missing in environment variables.');
+  if (!token) {
+    throw new Error('Token is required to decode.');
   }
 
-  const refreshToken = jwt.sign({ userId }, process.env.JWT_REFRESH_SECRET, { expiresIn: '30d' });
-  return refreshToken;
+  try {
+    const decoded = jwt.verify(token, secret);
+    return decoded;
+  } catch (error) {
+    throw new Error(`Error decoding token: ${error.message}`);
+  }
 }
 
-module.exports = { generateAccessToken, generateRefreshToken };
+module.exports = { generateToken, decodedToken };

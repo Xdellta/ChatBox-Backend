@@ -1,4 +1,4 @@
-const { generateAccessToken, generateRefreshToken } = require('../services/jwtService');
+const { generateToken, decodedToken } = require('../services/jwtService');
 const HttpError = require('../utils/HttpError');
 const patterns = require('../utils/patterns');
 const prisma = require('../../prisma/prismaClient');
@@ -30,8 +30,8 @@ async function login(req, res, next) {
     }
 
     // Generate JWT token
-    const accessToken = generateAccessToken(user.user_id);
-    const refreshToken = generateRefreshToken(user.user_id);
+    const accessToken = generateToken(user.user_id, process.env.JWT_ACCESS_SECRET, process.env.ACCESS_EXPIRATION);
+    const refreshToken = generateToken(user.user_id, process.env.JWT_REFRESH_SECRET, process.env.REFRESH_EXPIRATION);
 
     if (accessToken.error) {
       return next(new HttpError(500, 'Error while generating access token.', accessToken.error, req));
@@ -89,8 +89,8 @@ async function register(req, res, next) {
     });
 
     // Generate JWT token
-    const accessToken = generateAccessToken(newUser.user_id);
-    const refreshToken = generateRefreshToken(newUser.user_id);
+    const accessToken = generateToken(user.user_id, process.env.JWT_ACCESS_SECRET, process.env.ACCESS_EXPIRATION);
+    const refreshToken = generateToken(user.user_id, process.env.JWT_REFRESH_SECRET, process.env.REFRESH_EXPIRATION);
 
     if (accessToken.error) {
       return next(new HttpError(500, 'Error while generating access token.', accessToken.error, req));
@@ -109,4 +109,27 @@ async function register(req, res, next) {
   }
 }
 
-module.exports = { login, register };
+
+// Refresh token JWT
+async function refreshToken(req, res, next) {
+  const refreshToken = req.cookies.refreshToken;
+
+  if (!refreshToken) {
+    return next(new HttpError(401, 'Unauthorized.', 'No refresh token', req));
+  }
+
+  try {
+    decoded = decodedToken(process.env.JWT_REFRESH_SECRET, refreshToken);
+
+    if (!decoded) {
+      return next(new HttpError(401, 'Unauthorized.', decoded.error, req));
+    }
+
+    console.log(decoded);
+
+  } catch (error) {
+    return next(new HttpError(500, 'An error occurred while processing a refresh token request.', error.message, req));
+  }
+}
+
+module.exports = { login, register, refreshToken };
