@@ -1,8 +1,8 @@
-const { generateToken, decodedToken } = require('../services/jwtService');
 const HttpError = require('../utils/HttpError');
 const patterns = require('../utils/patterns');
 const prisma = require('../../prisma/prismaClient');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 // Login
 async function login(req, res, next) {
@@ -30,26 +30,26 @@ async function login(req, res, next) {
     }
 
     // Generate JWT token
-    const accessToken = generateToken(user.user_id, process.env.JWT_ACCESS_SECRET, process.env.ACCESS_EXPIRATION);
-    const refreshToken = generateToken(user.user_id, process.env.JWT_REFRESH_SECRET, process.env.REFRESH_EXPIRATION);
+    const accessToken = jwt.sign({ userId: user.user_id }, process.env.JWT_ACCESS_SECRET, {
+      expiresIn: process.env.ACCESS_EXPIRATION,
+    });
+    const refreshToken = jwt.sign({ userId: user.user_id }, process.env.JWT_REFRESH_SECRET, {
+      expiresIn: process.env.REFRESH_EXPIRATION,
+    });
 
-    if (accessToken.error) {
-      return next(new HttpError(500, 'Error while generating access token.', accessToken.error, req));
-    }
     
-    if (refreshToken.error) {
-      return next(new HttpError(500, 'Error while generating refresh token.', refreshToken.error, req));
-    }
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      sameSite: 'Strict',
+      maxAge: parseInt(process.env.REFRESH_EXPIRATION) * 1000,
+    });
 
-    // Successful login
     res.setHeader('Authorization', `Bearer ${accessToken}`);
-    res.setHeader('X-Refresh-Token', refreshToken);
     res.status(200).json({ message: 'Login successful.' });
   } catch (error) {
     return next(new HttpError(500, 'An error occurred while processing the login request.', error.message, req));
   }
 }
-
 
 // Register
 async function register(req, res, next) {
@@ -89,26 +89,26 @@ async function register(req, res, next) {
     });
 
     // Generate JWT token
-    const accessToken = generateToken(user.user_id, process.env.JWT_ACCESS_SECRET, process.env.ACCESS_EXPIRATION);
-    const refreshToken = generateToken(user.user_id, process.env.JWT_REFRESH_SECRET, process.env.REFRESH_EXPIRATION);
+    const accessToken = jwt.sign({ userId: newUser.user_id }, process.env.JWT_ACCESS_SECRET, {
+      expiresIn: process.env.ACCESS_EXPIRATION,
+    });
+    const refreshToken = jwt.sign({ userId: newUser.user_id }, process.env.JWT_REFRESH_SECRET, {
+      expiresIn: process.env.REFRESH_EXPIRATION,
+    });
 
-    if (accessToken.error) {
-      return next(new HttpError(500, 'Error while generating access token.', accessToken.error, req));
-    }
+    
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      sameSite: 'Strict',
+      maxAge: parseInt(process.env.REFRESH_EXPIRATION) * 1000,
+    });
 
-    if (refreshToken.error) {
-      return next(new HttpError(500, 'Error while generating refresh token.', refreshToken.error, req));
-    }
-
-    // Successful register
     res.setHeader('Authorization', `Bearer ${accessToken}`);
-    res.setHeader('X-Refresh-Token', refreshToken);
     res.status(200).json({ message: 'Register successful.' });
   } catch (error) {
     return next(new HttpError(500, 'An error occurred while processing the register request.', error.message, req));
   }
 }
-
 
 // Refresh token JWT
 async function refreshToken(req, res, next) {
@@ -119,16 +119,16 @@ async function refreshToken(req, res, next) {
   }
 
   try {
-    decoded = decodedToken(process.env.JWT_REFRESH_SECRET, refreshToken);
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
 
-    if (!decoded) {
-      return next(new HttpError(401, 'Unauthorized.', decoded.error, req));
-    }
+    const accessToken = jwt.sign({ userId: decoded.userId }, process.env.JWT_ACCESS_SECRET, {
+      expiresIn: process.env.ACCESS_EXPIRATION,
+    });
 
-    console.log(decoded);
-
+    res.setHeader('Authorization', `Bearer ${accessToken}`);
+    res.status(200).json({ message: 'Token refreshed.' });
   } catch (error) {
-    return next(new HttpError(500, 'An error occurred while processing a refresh token request.', error.message, req));
+    return next(new HttpError(500, 'An error occurred while processing the refresh token request.', error.message, req));
   }
 }
 
