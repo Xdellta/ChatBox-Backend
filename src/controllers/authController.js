@@ -30,10 +30,10 @@ async function login(req, res, next) {
     }
 
     // Generate JWT token
-    const accessToken = jwt.sign({ userId: user.user_id }, process.env.JWT_ACCESS_SECRET, {
+    const accessToken = jwt.sign({ userId: user.id }, process.env.JWT_ACCESS_SECRET, {
       expiresIn: process.env.ACCESS_EXPIRATION,
     });
-    const refreshToken = jwt.sign({ userId: user.user_id }, process.env.JWT_REFRESH_SECRET, {
+    const refreshToken = jwt.sign({ userId: user.id }, process.env.JWT_REFRESH_SECRET, {
       expiresIn: process.env.REFRESH_EXPIRATION,
     });
 
@@ -89,10 +89,10 @@ async function register(req, res, next) {
     });
 
     // Generate JWT token
-    const accessToken = jwt.sign({ userId: newUser.user_id }, process.env.JWT_ACCESS_SECRET, {
+    const accessToken = jwt.sign({ userId: newUser.id }, process.env.JWT_ACCESS_SECRET, {
       expiresIn: process.env.ACCESS_EXPIRATION,
     });
-    const refreshToken = jwt.sign({ userId: newUser.user_id }, process.env.JWT_REFRESH_SECRET, {
+    const refreshToken = jwt.sign({ userId: newUser.id }, process.env.JWT_REFRESH_SECRET, {
       expiresIn: process.env.REFRESH_EXPIRATION,
     });
 
@@ -118,7 +118,13 @@ async function refreshToken(req, res, next) {
     return next(new HttpError(401, 'Unauthorized.', 'No refresh token', req));
   }
 
+  if (!process.env.JWT_REFRESH_SECRET || !process.env.JWT_ACCESS_SECRET || !process.env.ACCESS_EXPIRATION) {
+    return next(new HttpError(500, 'Incorrect server configuration.', 'Missing environment variables', req));
+  }
+
   try {
+    // Sprawdzić w bazie danych czy refresh token jest na czarnej liście
+
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
 
     const accessToken = jwt.sign({ userId: decoded.userId }, process.env.JWT_ACCESS_SECRET, {
@@ -128,6 +134,10 @@ async function refreshToken(req, res, next) {
     res.setHeader('Authorization', `Bearer ${accessToken}`);
     res.status(200).json({ message: 'Token refreshed.' });
   } catch (error) {
+    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+      return next(new HttpError(401, 'Unauthorized.', error.message, req));
+    }
+
     return next(new HttpError(500, 'An error occurred while processing the refresh token request.', error.message, req));
   }
 }

@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  user_id           String    @id @default(uuid())
+  id                String    @id @default(uuid())
   email             String    @unique
   username          String
   hashed_password   String
@@ -17,4 +17,12 @@ model User {
   created_at        DateTime  @default(now())
 
   @@map("Users")
+}
+
+model JwtBlacklist {
+  id                String     @id @default(uuid())
+  token             String     @unique
+  created_at        DateTime   @default(now())
+
+  @@map("jwt_blacklist")
 }
