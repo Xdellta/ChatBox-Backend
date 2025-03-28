@@ -4,6 +4,7 @@ const prisma = require('../../prisma/prismaClient');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+
 // Login
 async function login(req, res, next) {
   const { email, password } = req.body;
@@ -49,6 +50,37 @@ async function login(req, res, next) {
     return next(new HttpError(500, 'An error occurred while processing the login request.', error.message, req));
   }
 }
+
+
+// Logout
+async function logout() {
+  const refreshToken = req.cookies.refreshToken;
+
+  if (!refreshToken) {
+    return next(new HttpError(400, 'No refresh token provided.', 'No refresh token was found in the cookies.', req));
+  }
+
+  try {
+    // Check if token is already blacklisted
+    const existingToken = await prisma.jwtBlacklist.findUnique({
+      where: { token: refreshToken },
+    });
+
+    if (!existingToken) {
+      await prisma.jwtBlacklist.create({
+        data: { token: refreshToken },
+      });
+    }
+
+    res.clearCookie('refreshToken', { httpOnly: true, sameSite: 'Strict' });
+    res.setHeader('Authorization', '');
+    res.status(200).json({ message: 'Logout successful.' });
+
+  } catch (error) {
+    return next(new HttpError(500, 'An error occurred while processing the logout request.', error.message, req));
+  }
+}
+
 
 // Register
 async function register(req, res, next) {
@@ -111,6 +143,7 @@ async function register(req, res, next) {
   }
 }
 
+
 // Refresh token JWT
 async function refreshToken(req, res, next) {
   const refreshToken = req.cookies.refreshToken;
@@ -124,6 +157,9 @@ async function refreshToken(req, res, next) {
   }
 
   try {
+    // Verify the refresh token
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+
     // Check if the token is blacklisted
     const blacklistedToken = await prisma.jwtBlacklist.findUnique({
       where: {
@@ -134,9 +170,6 @@ async function refreshToken(req, res, next) {
     if (blacklistedToken) {
       return next(new HttpError(401, 'Unauthorized.', 'Token is blacklisted.', req));
     }
-
-    // Verify the refresh token
-    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
 
     // Generate new access token
     const accessToken = jwt.sign({ userId: decoded.userId }, process.env.JWT_ACCESS_SECRET, {
@@ -156,4 +189,4 @@ async function refreshToken(req, res, next) {
 }
 
 
-module.exports = { login, register, refreshToken };
+module.exports = { login, register, logout, refreshToken };

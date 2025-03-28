@@ -16,7 +16,7 @@ model User {
   active            Boolean   @default(false)
   created_at        DateTime  @default(now())
 
-  @@map("Users")
+  @@map("users")
 }
 
 model JwtBlacklist {
